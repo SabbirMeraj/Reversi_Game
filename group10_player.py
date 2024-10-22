@@ -1,6 +1,8 @@
 import numpy as np
 import socket, pickle
 from reversi import reversi
+import os
+import pandas as pd
 
 PRIORITY_MATRIX = [
     [100, -20, 10, 5, 5, 10, -20, 100],
@@ -25,6 +27,11 @@ def evaluateBoard(board):
                 min_score += PRIORITY_MATRIX[i][j]
     return max_score - min_score
 
+def calculate_score(board):
+    white_score = np.sum(board == 1)
+    black_score = np.sum(board == -1)
+
+    return white_score, black_score
 
 def isGameComplete(depth):
     return depth == 3
@@ -87,6 +94,17 @@ def player_turn(game, turn):
 
     return x, y
 
+def save_score(isWhite, white_score, black_score):
+    filename = "scores.csv"
+
+    if isWhite:
+        df = pd.DataFrame([(white_score, black_score)], columns=["Our AI", "Greedy AI"])
+    else:
+        df = pd.DataFrame([(black_score, white_score)], columns=["Our AI", "Greedy AI"])
+    if os.path.exists(filename):
+        df.to_csv(filename, mode='a', header=False, index=False)
+    else:
+        df.to_csv(filename, index= False)
 
 def main():
     game_socket = socket.socket()
@@ -101,12 +119,19 @@ def main():
 
             turn, board = pickle.loads(data)
 
-            if turn == 0:  # Game has ended
+            if turn == 1:
+                isWhite = True
+            elif turn == -1:
+                isWhite= False
+            elif turn == 0:
+                white_score, black_score = calculate_score(board)
                 print("Game Over")
+                print(f"Score: White-{white_score} , Black-{black_score}")
+                save_score(isWhite, white_score, black_score)
                 break
 
-            print(f"Turn: {turn}")
-            print(np.rot90(board))
+            #print(f"Turn: {turn}")
+            #print(np.rot90(board))
 
             game.board = board  # Update the game state
             x, y = player_turn(game, turn)
@@ -114,7 +139,7 @@ def main():
             game_socket.send(pickle.dumps([x, y]))
 
         except Exception as e:
-            print(f"Error: {e}")
+            #print(f"Error: {e}")
             break
 
     game_socket.close()
