@@ -1,7 +1,7 @@
 Required Libaries:
-    pygame
-    numpy
-    pandas
+pygame
+numpy
+pandas
 
 How to Run:
 1. Run main.py (python3 main.py)
