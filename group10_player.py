@@ -34,11 +34,19 @@ def calculate_score(board):
     return white_score, black_score
 
 def isGameComplete(depth):
-    return depth == 3
+    return depth == 4
 
+def has_valid_moves(game, player):
+    for i in range(8):
+        for j in range(8):
+            if game.step(i, j, player, False) > 0:  # Check if the move is valid
+                return True
+    return False
 
 def min_max(game, depth, isMaxPlayer, alpha, beta):
     if isGameComplete(depth):
+        return evaluateBoard(game.board)
+    if not has_valid_moves(game, 1 if isMaxPlayer else -1):
         return evaluateBoard(game.board)
 
     if isMaxPlayer:

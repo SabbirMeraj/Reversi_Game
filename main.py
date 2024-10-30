@@ -49,6 +49,8 @@ def read_csv(filename):
         print(f"Our AI Won by {diff} points")
     elif diff < 0:
         print(f"Our AI Lost by {-diff} points")
+    else:
+        print("Match Draw")
 def play():
     print("Round 1: Our AI goes first")
     isFirstPlayer = True
